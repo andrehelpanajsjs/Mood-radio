@@ -1,1 +1,306 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mood Radio</title>
 
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 500px;
+      padding: 24px;
+      text-align: center;
+    }
+
+    h1 {
+      margin-bottom: 8px;
+    }
+
+    .status {
+      opacity: 0.7;
+      margin-bottom: 25px;
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 15px;
+      padding: 20px 10px;
+      font-size: 18px;
+      font-weight: bold;
+      background: #292929;
+      color: white;
+      cursor: pointer;
+    }
+
+    button:active {
+      transform: scale(0.96);
+    }
+
+    .display {
+      min-height: 100vh;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .character {
+      font-size: 100px;
+      margin-bottom: 20px;
+    }
+
+    .mood {
+      font-size: 42px;
+      font-weight: bold;
+      letter-spacing: 3px;
+    }
+
+    .display-status {
+      margin-top: 15px;
+      opacity: 0.6;
+    }
+  </style>
+</head>
+
+<body>
+
+<div id="app"></div>
+
+<script type="module">
+
+  /* =========================
+     CONFIGURACIÓN SUPABASE
+     ========================= */
+
+  const SUPABASE_URL =
+    "https://wdxxeoiweusygdnoylaz.supabase.co";
+
+  const SUPABASE_KEY =
+    "sb_publishable_VEDli7KJZdAhpMlqvYul4Q_uAvFdiFo";
+
+  /* ========================= */
+
+  import {
+    createClient
+  } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+  const supabase = createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+
+  const params = new URLSearchParams(window.location.search);
+
+  const mode = params.get("mode") || "display";
+
+  const room = params.get("room") || "mood-radio-345-test";
+
+  const app = document.getElementById("app");
+
+  let currentMood = "CHILL";
+
+
+  /* =========================
+     CONEXIÓN
+     ========================= */
+
+  const channel = supabase.channel(room);
+
+
+  /* =========================
+     FUNCIÓN PARA CAMBIAR MOOD
+     ========================= */
+
+  function setMood(mood) {
+
+    currentMood = mood;
+
+    if (mode === "display") {
+
+      const moodElement =
+        document.querySelector(".mood");
+
+      const character =
+        document.querySelector(".character");
+
+      if (moodElement)
+        moodElement.textContent = mood;
+
+      if (character) {
+
+        const faces = {
+          HOPE: "🙂",
+          SAD: "😢",
+          CHILL: "😌",
+          VOID: "😐",
+          HYPE: "🤯",
+          SLEEP: "😴"
+        };
+
+        character.textContent =
+          faces[mood] || "😐";
+      }
+    }
+  }
+
+
+  /* =========================
+     MODO CONTROL
+     ========================= */
+
+  if (mode === "control") {
+
+    app.innerHTML = `
+      <h1>📻 MOOD RADIO</h1>
+
+      <div class="status">
+        Control remoto
+      </div>
+
+      <div class="buttons">
+
+        <button data-mood="HOPE">
+          🌱 HOPE
+        </button>
+
+        <button data-mood="SAD">
+          💧 SAD
+        </button>
+
+        <button data-mood="CHILL">
+          🌙 CHILL
+        </button>
+
+        <button data-mood="VOID">
+          🕳️ VOID
+        </button>
+
+        <button data-mood="HYPE">
+          🔥 HYPE
+        </button>
+
+        <button data-mood="SLEEP">
+          😴 SLEEP
+        </button>
+
+      </div>
+
+      <p class="status">
+        Mood actual: <b id="current">CHILL</b>
+      </p>
+    `;
+
+
+    document
+      .querySelectorAll("[data-mood]")
+      .forEach(button => {
+
+        button.addEventListener("click", async () => {
+
+          const mood =
+            button.dataset.mood;
+
+          document
+            .getElementById("current")
+            .textContent = mood;
+
+          await channel.send({
+
+            type: "broadcast",
+
+            event: "mood",
+
+            payload: {
+              mood: mood
+            }
+
+          });
+
+        });
+
+      });
+
+  }
+
+
+  /* =========================
+     MODO DISPLAY
+     ========================= */
+
+  else {
+
+    document.body.style.background =
+      "transparent";
+
+    app.innerHTML = `
+
+      <div class="display">
+
+        <div class="character">
+          😌
+        </div>
+
+        <div class="mood">
+          CHILL
+        </div>
+
+        <div class="display-status">
+          📻 Mood Radio
+        </div>
+
+      </div>
+
+    `;
+
+  }
+
+
+  /* =========================
+     RECIBIR MOODS
+     ========================= */
+
+  channel
+    .on(
+      "broadcast",
+      { event: "mood" },
+      ({ payload }) => {
+
+        if (payload && payload.mood) {
+
+          setMood(
+            payload.mood
+          );
+
+        }
+
+      }
+    )
+    .subscribe();
+
+</script>
+
+</body>
+</html>
