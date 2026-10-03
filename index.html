@@ -137,11 +137,8 @@
        PERSONAJE / GIF
        ================================= */
 
-    .const gifSizes = {
-      HOPE: 140,
-      SAD: 98,
-      VOID: 140
-      };
+    .character {
+      height: auto;
 
       display: block;
 
@@ -233,11 +230,6 @@
         bottom: 15px;
 
         width: 160px;
-      }
-
-      .character {
-        width: 140px;
-        height: auto;
       }
 
       .radio {
@@ -360,7 +352,7 @@
         id="displayMood"
         class="mood-name"
       >
-        CHILL
+        HOPE
       </div>
 
     </div>
@@ -436,17 +428,37 @@
 
     /* =================================
        GIFS
-       =================================
-       
-       Por ahora solo tenemos dos.
-       Los demás los agregaremos después.
        ================================= */
 
     const gifs = {
 
       HOPE: "./hope.gif",
 
-      SAD: "./sad.gif"
+      SAD: "./sad.gif",
+
+      VOID: "./void.gif"
+
+    };
+
+
+    /* =================================
+       TAMAÑOS INDIVIDUALES
+       =================================
+       
+       Cada mood puede tener
+       un tamaño diferente.
+
+       Estos son nuestros valores
+       iniciales de prueba.
+       ================================= */
+
+    const gifSizes = {
+
+      HOPE: 140,
+
+      SAD: 98,
+
+      VOID: 140
 
     };
 
@@ -498,6 +510,19 @@
 
         character.src =
           gifs[mood];
+
+      }
+
+
+      /*
+       * Cambiamos el tamaño
+       * específico del mood.
+       */
+
+      if (gifSizes[mood]) {
+
+        character.style.width =
+          gifSizes[mood] + "px";
 
       }
 
