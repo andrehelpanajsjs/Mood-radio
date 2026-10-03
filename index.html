@@ -426,15 +426,15 @@
      * Después entran nuestros GIFs.
      */
 
-    const faces = {
+    const gifs = {
 
-      HOPE: "🙂",
+      HOPE: "alv",
 
-      SAD: "😢",
+      SAD: "./sad.gif",
 
       CHILL: "😌",
 
-      VOID: "😐",
+      VOID: "./void.gif",
 
       HYPE: "🤯",
 
@@ -479,12 +479,12 @@
       void character.offsetWidth;
 
 
-      character.textContent =
-        faces[mood] || "😐";
+      if (gifs[mood]) {
+    character.src = gifs[mood];
+  }
 
+  displayMood.textContent = mood;
 
-      displayMood.textContent =
-        mood;
 
 
       character.classList.add(
